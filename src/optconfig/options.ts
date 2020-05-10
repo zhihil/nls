@@ -15,5 +15,5 @@ export const availableOptions: OptionConfig = {
         type: 'long',
         hasArg: false,
         hasOptionalArg: false
-    },
+    }
 };

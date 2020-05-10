@@ -63,6 +63,8 @@ function parserMain(args: string[]): [ParsedOptions, string[]] {
         if (isLongOption(args[i])) {
             i += parsedArgs[option] ? 2 : 1;
             break;
+        } else {
+            i += parsedArgs[option] ? 1 : 0;
         }
     }
 
