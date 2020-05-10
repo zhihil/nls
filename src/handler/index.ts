@@ -1,3 +1,7 @@
-export function handler(optMap) {
-    console.error("WARNING - handler not implemented");
+import { ParsedOptions } from "../parser/types";
+
+export function handler(optMap: [ParsedOptions, string[]]) {
+    console.log("from the handler");
+    console.log(optMap[0]);
+    console.log(optMap[1]);
 }
