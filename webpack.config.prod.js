@@ -7,4 +7,5 @@ module.exports = {
     filename: 'nls',
     path: path.resolve(__dirname, 'dist'),
   },
+  target: 'node'
 };
