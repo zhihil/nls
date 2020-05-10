@@ -1,3 +1,1 @@
-import dependency from "./parser";
-
-console.log(dependency);
+console.log("Hello, world!");
