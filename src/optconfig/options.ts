@@ -2,16 +2,18 @@ import { OptionConfig } from "./types";
 
 enum Option {
     ALL_SHORT = 'a',
-    ALL_LONG  = 'all'
+    ALL_LONG  = 'all',
 }
 
 export const availableOptions: OptionConfig = {
     [Option.ALL_SHORT] : {
+        type: 'short',
+        hasArg: false,
+        hasOptionalArg: false,
+    },
+    [Option.ALL_LONG] : {
+        type: 'long',
         hasArg: false,
         hasOptionalArg: false
     },
-    [Option.ALL_LONG] : {
-        hasArg: false,
-        hasOptionalArg: false
-    }
 };

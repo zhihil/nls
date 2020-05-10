@@ -1,64 +1,77 @@
-import { isLongOption, isNormalArgument, isShortOption } from "./options";
+import { isLongOption, isNormalArgument, extractShortOptionName, validateOption, extractLongOptionName } from "./options";
 import availableOptions from "../optconfig";
 import { ParserError, ParserErrorType } from "./error";
 import { ParsedOptions } from "./types";
 
-function extractLongOptionName(token: string) {
-    return token.slice(2);
-}
-
-function extractShortOptionName(token: string) {
-    return token.slice(1);
-}
-
-function validateOption(token: string) {
-    for (let option of Object.keys(availableOptions)) {
-        if (option === token) return true;
+function parseArgument(parsedArgs: ParsedOptions, option: string, optVal: string | null) {
+    // Check if the option requires an argument 
+    if (!availableOptions[option].hasArg) {
+        parsedArgs[option] = null;
+        return false;
     }
+
+    // Extract the required argument
+    if (!optVal && !availableOptions[option].hasOptionalArg) {
+        return true;
+    }
+    parsedArgs[option] = optVal;
+
     return false;
 }
 
-function parser_main(args: string[]): [ParsedOptions, string[]] {
+function parserMain(args: string[]): [ParsedOptions, string[]] {
     // Construct a mapping to represent the parsed arguments.
     let parsedArgs: ParsedOptions = {};
-    let normalArgs: string[] = [];
+    let normalArgs: string[] = null;
 
     // Start from the third cmdline arg
     let i = 2;
 
     // Parse command line options
     for (; i < args.length; ++i) {
-        
-        if (isLongOption(args[i])) {
-            const option = extractLongOptionName(args[i]);
+        if (isNormalArgument(args[i])) {
+            break;
+        }
 
-            // Check that the option is valid
-            if (!validateOption(option)) {
+        let option = null;
+        let optionVal = args[i + 1] && isNormalArgument(args[i + 1]) 
+            ? args[i + 1] 
+            : null;
+
+        if (isLongOption(args[i])) {
+            option = extractLongOptionName(args[i]);
+
+            if (!validateOption(option, 'long')) {
                 throw new ParserError(ParserErrorType.INVALID_OPTION, args[i]);
             }
+        } else {
+            option = extractShortOptionName(args[i]);
 
-            // Check if the option requires an argument 
-            if (!availableOptions[option].hasArg) {
-                parsedArgs[option] = null;
-                ++i; break;
+            if (!validateOption(option, 'short')) {
+                throw new ParserError(ParserErrorType.INVALID_OPTION, args[i]);
             }
+        }
 
-            // Extract the required argument
-            let optArg = args[i + 1] || null;
+        if (option in parsedArgs) {
+            throw new ParserError(ParserErrorType.DUPLICATE_OPT, args[i]);
+        }
 
-            if (optArg && !isNormalArgument(optArg)) optArg = null;
-
-            if (!optArg && !availableOptions[option].hasOptionalArg) {
-                throw new ParserError(ParserErrorType.MISSING_ARG, args[i]);
-            }
-            parsedArgs[option] = optArg;
-
-            ++i; break;
+        const err = parseArgument(parsedArgs, option, optionVal);
+        if (err) {
+            throw new ParserError(ParserErrorType.MISSING_ARG, args[i]);
+        }
+        if (isLongOption(args[i])) {
+            i += parsedArgs[option] ? 2 : 1;
+            break;
         }
     }
 
-    // Parse "normal" arguments
+    // We should maintain the invariant that at this point in execution 
+    // `arg[i]` is the first argument that is not an option nor a option
+    // argument.
 
+    // Parse "normal" arguments
+    normalArgs = args.slice(i);
 
     return [parsedArgs, normalArgs];
 }
@@ -67,7 +80,7 @@ export function parser(args: string[]): [ParsedOptions, string[]] {
     let parsedArgs;
 
     try {
-        parsedArgs = parser_main(args);
+        parsedArgs = parserMain(args);
     } catch (err) {
         const parserError = err as ParserError;
         if (parserError.type === ParserErrorType.MISSING_ARG) {
@@ -77,6 +90,12 @@ export function parser(args: string[]): [ParsedOptions, string[]] {
         if (parserError.type === ParserErrorType.INVALID_OPTION) {
             process.stdout.write(`ls: invalid argument ${parserError.option}\n`);
         }
+
+        if (parserError.type === ParserErrorType.DUPLICATE_OPT) {
+            process.stdout.write(`ls: duplicate option ${parserError.option}\n`);
+        }
+
+        process.exit(1);
     }
 
     return parsedArgs;
