@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "Node.js implementation of bash ls command",
   "main": "nls.js",
+  "private": true,
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "build": "tsc; npx webpack --config webpack.config.dev.js",
+    "build-prod": "tsc; npx webpack --config webpack.config.prod.js"
   },
   "keywords": [
     "ls",
@@ -16,5 +19,11 @@
     "bash"
   ],
   "author": "Zhiheng Lu",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^3.8.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {}
 }
