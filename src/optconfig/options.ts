@@ -1,6 +1,6 @@
 import { OptionConfig } from "./types";
 
-enum Option {
+export enum Option {
     ALL_SHORT = 'a',
     ALL_LONG  = 'all',
 }
