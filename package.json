@@ -21,7 +21,7 @@
   "author": "Zhiheng Lu",
   "license": "ISC",
   "devDependencies": {
-    "mocha": "^7.1.2",
+    "mocha": "^10.2.0",
     "typescript": "^3.8.3",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
